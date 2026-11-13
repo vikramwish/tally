@@ -31,7 +31,7 @@ jobs:
           npx expo export --platform web --output-dir dist --clear
           node scripts/verify-web-export.mjs dist /tally
           cp dist/index.html dist/404.html
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
