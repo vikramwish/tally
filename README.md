@@ -1,21 +1,37 @@
 # Tally — workout tracker (Expo / React Native)
 
+[![CI](https://github.com/vikramwish/tally/actions/workflows/ci.yml/badge.svg)](https://github.com/vikramwish/tally/actions/workflows/ci.yml)
+[![Deploy Pages](https://github.com/vikramwish/tally/actions/workflows/pages.yml/badge.svg)](https://github.com/vikramwish/tally/actions/workflows/pages.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6.svg)](tsconfig.json)
+[![License: MIT](https://img.shields.io/badge/license-MIT-2F6F4E.svg)](LICENSE)
+
+> **Live Web Demo:** [vikramwish.github.io/tally](https://vikramwish.github.io/tally/)
+
 Core logging plus progress and PRs, built from the Tally design canvas
 (Paradion dark theme: Ink & Paper, one Ember accent, mono labels).
-All data stays on the phone (AsyncStorage). No account or server.
+All data stays on the phone or browser (`AsyncStorage`). No account or server.
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/desktop-1440.png" alt="Tally desktop web view (1440x900)" width="620" /></td>
+    <td><img src="docs/screenshots/mobile-390.png" alt="Tally mobile web view (390x844)" width="220" /></td>
+  </tr>
+</table>
 
 ## Run it
 
 ```bash
-npm install
-npx expo install --fix   # aligns package versions with your installed Expo SDK
-npx expo start           # scan the QR code with Expo Go, or press i / a
+npm ci
+npx expo start           # scan the QR code with Expo Go, or press i / a / w
 ```
 
-Tests (pure logic: 1RM, PRs, plates, warm-ups, streaks, muscle sets, workout ops):
+Static web bundle verification and pure logic tests (1RM, PRs, plates, warm-ups, streaks, muscle sets, workout ops, web bundle config):
 
 ```bash
+npm run typecheck
 npm test
+npx expo export --platform web --output-dir dist --clear
+node scripts/verify-web-export.mjs dist
 ```
 
 > Package versions are pinned to Expo SDK 53. If you're on a newer SDK,
@@ -77,7 +93,15 @@ time you log something isn't flagged as a record. Est. 1RM uses Epley.
 - Plan generator, and Geist fonts (the app uses system sans + Menlo /
   monospace; add `@expo-google-fonts/geist` if you want the exact type).
 
-## Layout
+## Layout & Architecture
+
+```mermaid
+flowchart LR
+  Screens["Expo Router Screens (app/)"] --> Store["Zustand Store + Pure Ops (src/store/)"]
+  Screens --> Components["UI Kit & Charts (src/components/)"]
+  Store --> Logic["Pure Domain Math: 1RM, PRs, Streaks, Plates (src/lib/)"]
+  Store --> Storage["AsyncStorage (Local-First Persistence)"]
+```
 
 ```
 app/                    expo-router screens
@@ -94,6 +118,12 @@ src/
   store/                zustand store (persisted) + pure ops on workouts/routines
   components/           UI kit, charts, number input, rest-timer watcher
   theme.ts              design tokens
+scripts/
+  verify-web-export.mjs validates static web bundle & guards against import.meta leaks
 ```
 
 Weights are always stored in kilograms and converted for display.
+
+## License
+
+Released under the [MIT License](LICENSE).
